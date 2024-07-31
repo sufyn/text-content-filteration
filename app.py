@@ -3,7 +3,7 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 import re
 
-# Load the saved model and vectorizer 
+# Load the model and vectorizer 
 loaded_model = joblib.load('logistic_regression_model.pkl')
 vect = joblib.load('vectorizer.pkl')
 
@@ -31,19 +31,19 @@ user_input = st.text_area("Enter text for toxicity prediction:")
 
 if st.button("Predict"):
     if user_input:
-        # Clean the user input
+        # Clean 
         cleaned_text = clean_text(user_input)
 
-        # Transform the cleaned text
+        # Transform 
         new_text_vec = vect.transform([cleaned_text])
 
-        # Predict the probability of abusiveness
+        # Predict 
         prediction = loaded_model.predict_proba(new_text_vec)[:, 1][0]
         val = prediction * 10000
-        # Display the prediction result
+        
         st.write(f"Abusiveness Percentage: {prediction * 10000:.2f}%")
 
-        # Classify as abusive if probability is more than 50%
+        
         if val > 50:
             st.error("This text is classified as abusive.")
         else:
