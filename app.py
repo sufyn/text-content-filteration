@@ -5,10 +5,9 @@ import re
 
 # Load the saved model and vectorizer 
 loaded_model = joblib.load('logistic_regression_model.pkl')
-vect = joblib.load('vectorizer.pkl')  
-# vect= TfidfVectorizer(max_features=5000,stop_words='english')
+vect = joblib.load('vectorizer.pkl')
 
-# cleaning function
+# Cleaning function
 def clean_text(text):
     text = text.lower()
     text = re.sub(r"what's", "what is ", text)
@@ -32,16 +31,16 @@ user_input = st.text_area("Enter text for toxicity prediction:")
 
 if st.button("Predict"):
     if user_input:
-        cleaned_text = [clean_text(text) for text in user_input]
+        # Clean the user input
+        cleaned_text = clean_text(user_input)
 
         # Transform the cleaned text
-        new_text_vec = vect.transform(cleaned_text)
+        new_text_vec = vect.transform([cleaned_text])
 
-        predictions = loaded_model.predict_proba(new_text_vec)[:, 1]
+        # Predict the probability of abusiveness
+        prediction = loaded_model.predict_proba(new_text_vec)[:, 1][0]
 
-        # Print the predicted probabilities as percentages
-        for prediction in predictions:
-            st.write(f"Abusiveness Percentage: {prediction * 100:.2f}%")
-            st.write("Prediction:", prediction)
+        # Display the prediction result
+        st.write(f"Abusiveness Percentage: {prediction * 100:.2f}%")
     else:
         st.warning("Please enter some text.")
