@@ -42,6 +42,6 @@ if st.button("Predict"):
         # Print the predicted probabilities as percentages
         for prediction in predictions:
             st.write(f"Abusiveness Percentage: {prediction * 100:.2f}%")
-            # st.write("Prediction:", prediction)
+            st.write("Prediction:", prediction)
     else:
         st.warning("Please enter some text.")
