@@ -37,7 +37,7 @@ if st.button("Predict"):
         # Transform the cleaned text
         new_text_vec = vect.transform(cleaned_text)
 
-        prediction = loaded_model.predict_proba(new_text_vec)[:, 1]
+        predictions = loaded_model.predict_proba(new_text_vec)[:, 1]
 
         # Print the predicted probabilities as percentages
         for prediction in predictions:
