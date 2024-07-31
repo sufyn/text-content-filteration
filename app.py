@@ -1,6 +1,7 @@
 import streamlit as st
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+import re
 
 # Load the saved model and vectorizer 
 loaded_model = joblib.load('logistic_regression_model.pkl')
