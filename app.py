@@ -5,8 +5,8 @@ import re
 
 # Load the saved model and vectorizer 
 loaded_model = joblib.load('logistic_regression_model.pkl')
-# vect = joblib.load('tfidf_vectorizer.pkl')  
-vect= TfidfVectorizer(max_features=5000,stop_words='english')
+vect = joblib.load('vectorizer.pkl')  
+# vect= TfidfVectorizer(max_features=5000,stop_words='english')
 
 # cleaning function
 def clean_text(text):
