@@ -41,10 +41,10 @@ if st.button("Predict"):
         prediction = loaded_model.predict_proba(new_text_vec)[:, 1][0]
 
         # Display the prediction result
-        st.write(f"Abusiveness Percentage: {prediction * 100:.2f}%")
+        st.write(f"Abusiveness Percentage: {prediction * 10000:.2f}%")
 
         # Classify as abusive if probability is more than 50%
-        if prediction > 0.45:
+        if prediction > 0.4:
             st.error("This text is classified as abusive.")
         else:
             st.success("This text is not classified as abusive.")
