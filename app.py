@@ -44,7 +44,7 @@ if st.button("Predict"):
         st.write(f"Abusiveness Percentage: {prediction * 10000:.2f}%")
 
         # Classify as abusive if probability is more than 50%
-        if val > 0.5:
+        if val > 50:
             st.error("This text is classified as abusive.")
         else:
             st.success("This text is not classified as abusive.")
