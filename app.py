@@ -32,13 +32,16 @@ user_input = st.text_area("Enter text for toxicity prediction:")
 
 if st.button("Predict"):
     if user_input:
-        cleaned_text = clean_text(user_input)
+        cleaned_text = [clean_text(text) for text in user_input]
 
         # Transform the cleaned text
-        new_text_vec = vect.transform([cleaned_text])
+        new_text_vec = vect.transform(cleaned_text)
 
-        prediction = loaded_model.predict(new_text_vec)
+        prediction = loaded_model.predict_proba(new_text_vec)[:, 1]
 
-        st.write("Prediction:", prediction)
+        # Print the predicted probabilities as percentages
+        for prediction in predictions:
+            st.write(f"Abusiveness Percentage: {prediction * 100:.2f}%")
+            # st.write("Prediction:", prediction)
     else:
         st.warning("Please enter some text.")
