@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Load the saved model and vectorizer 
 loaded_model = joblib.load('logistic_regression_model.pkl')
-vect = joblib.load('tfidf_vectorizer.pkl')  
+# vect = joblib.load('tfidf_vectorizer.pkl')  
 
 # cleaning function
 def clean_text(text):
