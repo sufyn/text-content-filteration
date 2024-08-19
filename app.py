@@ -1,33 +1,15 @@
 import streamlit as st
 import joblib
+from sklearn.feature_extraction.text import TfidfVectorizer
 import re
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load the model and vectorizer for toxicity prediction
 loaded_model = joblib.load('logistic_regression_model.pkl')
 vect = joblib.load('vectorizer.pkl')
 
-# Cleaning function
-def clean_text(text):
-    text = text.lower()
-    text = re.sub(r"what's", "what is ", text)
-    text = re.sub(r"\'s", " ", text)
-    text = re.sub(r"\'ve", " have ", text)
-    text = re.sub(r"can't", "cannot ", text)
-    text = re.sub(r"n't", " not ", text)
-    text = re.sub(r"i'm", "i am ", text)
-    text = re.sub(r"\'re", " are ", text)
-    text = re.sub(r"\'d", " would ", text)
-    text = re.sub(r"\'ll", " will ", text)
-    text = re.sub(r"\'scuse", " excuse ", text)
-    text = re.sub('\W', ' ', text)
-    text = re.sub('\s+', ' ', text)
-    text = text.strip(' ')
-    return text
-
-# Create the DataFrame with categories and keywords
+# Load the data and vectorizer for category suggestion
 data = pd.DataFrame({
     'Category': [
         'Travel & Transport', 'Education', 'Worker', 'Food', 'Real Estate',
@@ -63,57 +45,65 @@ data = pd.DataFrame({
     ]
 })
 
-# Preprocess the keywords by splitting them into individual words
-data['Keywords'] = data['Keywords'].apply(lambda x: ' '.join(x.split()))
-
-# Vectorize the keywords using TF-IDF
 tfidf_vectorizer = TfidfVectorizer()
 tfidf_matrix = tfidf_vectorizer.fit_transform(data['Keywords'])
-
-# Convert the TF-IDF matrix to an array for cosine similarity calculations
 tfidf_array = tfidf_matrix.toarray()
 
-# Function to get category suggestions based on user input
+# Cleaning function for toxicity prediction
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r"what's", "what is ", text)
+    text = re.sub(r"\'s", " ", text)
+    text = re.sub(r"\'ve", " have ", text)
+    text = re.sub(r"can't", "cannot ", text)
+    text = re.sub(r"n't", " not ", text)
+    text = re.sub(r"i'm", "i am ", text)
+    text = re.sub(r"\'re", " are ", text)
+    text = re.sub(r"\'d", " would ", text)
+    text = re.sub(r"\'ll", " will ", text)
+    text = re.sub(r"\'scuse", " excuse ", text)
+    text = re.sub('\W', ' ', text)
+    text = re.sub('\s+', ' ', text)
+    text = text.strip(' ')
+    return text
+
+# Function for category suggestion
 def get_category_suggestions(user_input, tfidf_vectorizer, tfidf_array, data):
-    # Transform the user input into the same TF-IDF space
     user_input_tfidf = tfidf_vectorizer.transform([user_input]).toarray()
-
-    # Calculate cosine similarity between user input and each category's keywords
     cosine_similarities = cosine_similarity(user_input_tfidf, tfidf_array).flatten()
-
-    # Get the indices of the top N categories with highest similarity
     top_indices = cosine_similarities.argsort()[-3:][::-1]
-
-    # Retrieve the corresponding categories
     suggestions = [data['Category'][i] for i in top_indices]
-
     return suggestions
 
-# Streamlit App
+# Streamlit app layout
 st.title("Text Analysis App")
 
-user_input = st.text_area("Enter text for analysis:")
+st.sidebar.title("Choose an option:")
+option = st.sidebar.selectbox("Select a task", ("Toxicity Prediction", "Category Suggestion"))
 
-if st.button("Analyze"):
-    if user_input:
-        # Clean the text
-        cleaned_text = clean_text(user_input)
-
-        # Toxicity Prediction
-        new_text_vec = vect.transform([cleaned_text])
-        prediction = loaded_model.predict_proba(new_text_vec)[:, 1][0]
-        val = prediction * 10000
-        
-        st.write(f"Abusiveness Percentage: {val:.2f}%")
-        
-        if val > 50:
-            st.error("This text is classified as abusive.")
+if option == "Toxicity Prediction":
+    st.header("Toxicity Prediction")
+    user_input = st.text_area("Enter text for toxicity prediction:")
+    if st.button("Predict Toxicity"):
+        if user_input:
+            cleaned_text = clean_text(user_input)
+            new_text_vec = vect.transform([cleaned_text])
+            prediction = loaded_model.predict_proba(new_text_vec)[:, 1][0]
+            val = prediction * 10000
+            st.write(f"Abusiveness Percentage: {val:.2f}%")
+            if val > 50:
+                st.error("This text is classified as abusive.")
+            else:
+                st.success("This text is not classified as abusive.")
         else:
-            st.success("This text is not classified as abusive.")
-        
-        # Category Suggestions
-        suggestions = get_category_suggestions(cleaned_text, tfidf_vectorizer, tfidf_array, data)
-        st.write(f"Suggested Categories: {', '.join(suggestions)}")
-        
-    else:
-        st.warning("Please enter some text.")
+            st.warning("Please enter some text.")
+
+elif option == "Category Suggestion":
+    st.header("Category Suggestion")
+    user_input = st.text_area("Enter a keyword to get category suggestions:")
+    if st.button("Get Suggestions"):
+        if user_input:
+            suggestions = get_category_suggestions(user_input, tfidf_vectorizer, tfidf_array, data)
+            st.write(f"Suggestions for '{user_input}': {suggestions}")
+        else:
+            st.warning("Please enter a keyword.")
